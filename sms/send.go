@@ -31,6 +31,11 @@ func (c *Client) SendSMS(ctx context.Context, input *SendSMSInput) (*SendSMSRece
 		req.OutId = tea.String(input.OutID)
 	}
 
+	return c.sendSMS(ctx, req)
+}
+
+// sendSMS 发送单条短信并返回回执，供 SendSMS 与 SendVerificationCode 复用。
+func (c *Client) sendSMS(ctx context.Context, req *dysmsapi.SendSmsRequest) (*SendSMSReceipt, error) {
 	resp, err := c.dysmsapi.SendSmsWithContext(ctx, req, &service.RuntimeOptions{})
 	if err != nil {
 		return nil, err

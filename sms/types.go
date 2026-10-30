@@ -272,3 +272,25 @@ type TemplateList struct {
 	// TotalCount 总数。
 	TotalCount int64
 }
+
+// SendVerificationCodeInput 发送验证码入参。
+type SendVerificationCodeInput struct {
+	// PhoneNumbers 接收号码，验证码场景通常为单个号码。
+	PhoneNumbers string
+	// SignName 短信签名名称。
+	SignName string
+	// TemplateCode 短信模板编号，模板须含 code 变量。
+	TemplateCode string
+	// CodeLength 验证码长度，不填时默认 6 位。
+	CodeLength int
+	// OutID 外部业务标识，可留空。
+	OutID string
+}
+
+// VerifyVerificationCodeInput 核验验证码入参。
+type VerifyVerificationCodeInput struct {
+	// PhoneNumber 接收号码，须与发送时一致。
+	PhoneNumber string
+	// Code 用户提交的验证码。
+	Code string
+}

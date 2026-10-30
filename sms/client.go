@@ -1,5 +1,5 @@
 // Package sms 提供阿里云短信（Aliyun SMS）服务的 SDK 封装，
-// 覆盖短信发送、发送明细查询、签名管理与模板管理四类能力。
+// 覆盖短信发送、发送明细查询、签名管理、模板管理与验证码能力。
 //
 // 文件类型：SDK 入口 —— Client 结构与构造器
 //
@@ -26,16 +26,18 @@ import (
 	"github.com/aliyun/credentials-go/credentials"
 )
 
-// Client 封装阿里云短信底层客户端，对外提供发送、查询、签名与模板管理能力。
+// Client 封装阿里云短信底层客户端，对外提供发送、查询、签名、模板与验证码能力。
 type Client struct {
 	// dysmsapi 阿里云短信底层客户端，仅包内使用。
 	dysmsapi *dysmsapi.Client
+	// codes 验证码暂存，按号码记录最近一次发送的验证码，仅进程内有效。
+	codes *codeStore
 }
 
 // NewClient 构造阿里云短信客户端。
 //
 // 默认通过凭据链初始化访问凭据（环境变量 / ECS RAM Role 等），
-// 可用 WithCredential、WithEndpoint、WithRegionID 覆盖，
+// 可用 WithCredential、WithEndpoint、WithRegionID、WithCodeTTL 覆盖，
 // 或用 WithClient 注入已构造的底层客户端。
 //
 // 返回：
@@ -47,29 +49,32 @@ func NewClient(opts ...Option) (*Client, error) {
 		opt(o)
 	}
 
+	c := &Client{}
 	if o.client != nil {
-		return &Client{dysmsapi: o.client}, nil
-	}
+		c.dysmsapi = o.client
+	} else {
+		cred := o.credential
+		if cred == nil {
+			var err error
+			cred, err = credentials.NewCredential(nil)
+			if err != nil {
+				return nil, err
+			}
+		}
 
-	cred := o.credential
-	if cred == nil {
-		var err error
-		cred, err = credentials.NewCredential(nil)
+		config := &openapi.Config{
+			Credential: cred,
+			Endpoint:   tea.String(o.endpoint),
+		}
+		if o.regionID != "" {
+			config.RegionId = tea.String(o.regionID)
+		}
+		client, err := dysmsapi.NewClient(config)
 		if err != nil {
 			return nil, err
 		}
+		c.dysmsapi = client
 	}
-
-	config := &openapi.Config{
-		Credential: cred,
-		Endpoint:   tea.String(o.endpoint),
-	}
-	if o.regionID != "" {
-		config.RegionId = tea.String(o.regionID)
-	}
-	client, err := dysmsapi.NewClient(config)
-	if err != nil {
-		return nil, err
-	}
-	return &Client{dysmsapi: client}, nil
+	c.codes = newCodeStore(o.codeTTL)
+	return c, nil
 }
