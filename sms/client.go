@@ -37,7 +37,7 @@ type Client struct {
 // NewClient 构造阿里云短信客户端。
 //
 // 默认通过凭据链初始化访问凭据（环境变量 / ECS RAM Role 等），
-// 可用 WithCredential、WithEndpoint、WithRegionID、WithCodeTTL 覆盖，
+// 可用 WithConfig、WithCredential、WithEndpoint、WithRegionID、WithCodeTTL 覆盖，
 // 或用 WithClient 注入已构造的底层客户端。
 //
 // 返回：
@@ -54,6 +54,13 @@ func NewClient(opts ...Option) (*Client, error) {
 		c.dysmsapi = o.client
 	} else {
 		cred := o.credential
+		if cred == nil && o.config != nil {
+			var err error
+			cred, err = o.config.buildCredential()
+			if err != nil {
+				return nil, err
+			}
+		}
 		if cred == nil {
 			var err error
 			cred, err = credentials.NewCredential(nil)

@@ -13,7 +13,7 @@ import "github.com/YoFut/Aliyun-SMS/sms"
 默认走阿里云凭据链，无需显式传入：依次读取环境变量
 `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET`、ECS RAM Role 等。
 
-需要覆盖时可用 `WithCredential` 显式注入。
+也可从调用方自身的配置管理器（如 `config.toml`）解析后，通过 `WithConfig` 传入 AK/SK、STS 或 ECS RAM Role 凭据（示例见 `configs/config.toml.example`）；凭据字段留空时回退到默认凭据链。需要更细粒度控制时可用 `WithCredential` 显式注入。
 
 ## 快速开始
 

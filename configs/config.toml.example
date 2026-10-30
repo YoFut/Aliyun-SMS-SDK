@@ -1,0 +1,19 @@
+# 阿里云短信 SDK 配置示例。
+# 复制本文件为 config.toml 后按需填写；凭据字段留空时，SDK 走环境变量默认凭据链
+# （ALIBABA_CLOUD_ACCESS_KEY_ID / ALIBABA_CLOUD_ACCESS_KEY_SECRET、ECS RAM Role 等）。
+
+# ---- 访问密钥（access_key / sts）----
+# 与 access_key_secret 成对填写；与 role_name 二选一。
+# access_key_id = "LTAI5t..."
+# access_key_secret = "..."
+
+# STS 临时凭证令牌（可选）：与 access_key_id/secret 一并填写时使用 sts 类型。
+# security_token = "..."
+
+# ---- ECS 实例 RAM 角色（ecs_ram_role）----
+# 与访问密钥二选一；留空时由默认凭据链自动读取 ECS 元数据。
+# role_name = "AliyunSMSRole"
+
+# ---- 服务接入（可选，留空用默认）----
+# endpoint = "dysmsapi.aliyuncs.com"
+# region_id = "cn-hangzhou"

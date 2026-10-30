@@ -9,6 +9,7 @@ import (
 )
 
 // defaultEndpoint 阿里云短信公共接入点。
+// 华东1（杭州），定义参考 https://api.aliyun.com/product/Dysmsapi?tab=endpoints
 const defaultEndpoint = "dysmsapi.aliyuncs.com"
 
 // defaultCodeTTL 验证码默认有效期。
@@ -17,6 +18,7 @@ const defaultCodeTTL = 5 * time.Minute
 // options 客户端可选配置，由 Option 函数逐一填充。
 type options struct {
 	credential credentials.Credential // 访问凭据
+	config     *Config                // 凭据与服务接入配置（来自调用方配置管理器）
 	endpoint   string                 // 服务接入点
 	regionID   string                 // 地域标识
 	codeTTL    time.Duration          // 验证码有效期
@@ -37,6 +39,22 @@ func defaultOptions() *options {
 // WithCredential 显式注入访问凭据，不指定时走默认凭据链。
 func WithCredential(credential credentials.Credential) Option {
 	return func(o *options) { o.credential = credential }
+}
+
+// WithConfig 从调用方自身配置管理器解析出的配置构造凭据与服务接入。
+//
+// 凭据字段留空时走默认凭据链；Endpoint、RegionID 留空时沿用默认值。
+// 凭据优先级：WithClient > WithCredential > WithConfig > 默认链。
+func WithConfig(cfg Config) Option {
+	return func(o *options) {
+		o.config = &cfg
+		if cfg.Endpoint != "" {
+			o.endpoint = cfg.Endpoint
+		}
+		if cfg.RegionID != "" {
+			o.regionID = cfg.RegionID
+		}
+	}
 }
 
 // WithEndpoint 覆盖服务接入点，默认 dysmsapi.aliyuncs.com。
