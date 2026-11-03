@@ -4,6 +4,7 @@ package sms
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v5/client"
@@ -38,7 +39,10 @@ func (c *Client) SendSMS(ctx context.Context, input *SendSMSInput) (*SendSMSRece
 func (c *Client) sendSMS(ctx context.Context, req *dysmsapi.SendSmsRequest) (*SendSMSReceipt, error) {
 	resp, err := c.dysmsapi.SendSmsWithContext(ctx, req, &service.RuntimeOptions{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("发送短信请求失败: %w", err)
+	}
+	if resp == nil || resp.Body == nil {
+		return nil, &Error{Message: "短信服务返回空响应", Cause: ErrService}
 	}
 	if err := checkBody(resp.Body); err != nil {
 		return nil, err

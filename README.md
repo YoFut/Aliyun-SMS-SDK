@@ -47,7 +47,7 @@ fmt.Println(receipt.BizID) // 回执编号，可用于查询发送状态
 
 ## 错误处理
 
-业务失败会返回带阿里云错误码的错误，常见错误映射为哨兵变量，可用 `errors.Is` 判断：
+业务失败返回 `*sms.Error`，保留 `Code`、`Message`、`RequestID`；常见错误仍可用 `errors.Is` 判断。传输错误保留底层错误链，可用 `errors.As` 读取官方 SDK 诊断。错误详情仅在后端流转，不应直接返回浏览器或未经脱敏写入日志：
 
 ```go
 if errors.Is(err, sms.ErrDailyQuotaExceeded) {
